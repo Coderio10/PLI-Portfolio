@@ -977,13 +977,15 @@ section {
   margin-top: 1.6rem;
 }
 .testi-grid {
+  --testi-gap: 1.2rem;
+  --testi-columns: 2;
   display: flex;
-  gap: 1.2rem;
+  gap: var(--testi-gap);
   transition: transform 0.45s var(--ease);
   will-change: transform;
 }
 .tcard {
-  flex: 0 0 100%;
+  flex: 0 0 calc((100% - (var(--testi-columns) - 1) * var(--testi-gap)) / var(--testi-columns));
   background: var(--glass-card);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
@@ -991,6 +993,9 @@ section {
   border-radius: 20px;
   padding: 2.5rem;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   transition:
     transform 0.35s var(--ease),
     box-shadow 0.35s;
@@ -1025,19 +1030,24 @@ section {
   gap: 0.9rem;
 }
 .tcard-avatar {
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  flex: 0 0 auto;
+  color: var(--accent2);
+  font-family: var(--ff-serif);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.tcard-avatar::before {
+  content: "-";
 }
 
 .tcard-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
+  display: none;
 }
 
 .tcard-name {
@@ -1333,6 +1343,9 @@ footer {
   }
   .testi-carousel {
     padding-inline: 0;
+  }
+  .testi-grid {
+    --testi-columns: 1;
   }
   .testi-controls {
     gap: 0.8rem;

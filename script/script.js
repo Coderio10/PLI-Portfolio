@@ -43,30 +43,48 @@ document.querySelectorAll('[data-carousel]').forEach(carousel => {
   const nextBtn = carousel.querySelector('.testi-next');
   const dots = carousel.querySelector('.testi-dots');
   let index = 0;
+  let dotButtons = [];
+  let autoPlayId;
 
-  slides.forEach((_, slideIndex) => {
-    const dot = document.createElement('button');
-    dot.type = 'button';
-    dot.className = 'testi-dot';
-    dot.setAttribute('aria-label', `Go to testimonial ${slideIndex + 1}`);
-    dot.addEventListener('click', () => {
-      index = slideIndex;
-      updateCarousel();
-    });
-    dots.appendChild(dot);
-  });
+  function getSlidesPerView() {
+    return window.innerWidth <= 900 ? 1 : 2;
+  }
 
-  const dotButtons = Array.from(dots.querySelectorAll('.testi-dot'));
+  function getMaxIndex() {
+    return Math.max(0, slides.length - getSlidesPerView());
+  }
+
+  function renderDots() {
+    const dotCount = getMaxIndex() + 1;
+    dots.innerHTML = '';
+    dotButtons = [];
+
+    for (let slideIndex = 0; slideIndex < dotCount; slideIndex += 1) {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'testi-dot';
+      dot.setAttribute('aria-label', `Go to testimonial ${slideIndex + 1}`);
+      dot.addEventListener('click', () => {
+        index = slideIndex;
+        updateCarousel();
+        restartAutoPlay();
+      });
+      dots.appendChild(dot);
+      dotButtons.push(dot);
+    }
+  }
 
   function updateCarousel() {
+    const maxIndex = getMaxIndex();
+    index = Math.max(0, Math.min(index, maxIndex));
     const slideWidth = slides[0].getBoundingClientRect().width;
     const trackStyles = window.getComputedStyle(track);
     const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || 0);
     const offset = index * (slideWidth + gap);
 
     track.style.transform = `translateX(-${offset}px)`;
-    prevBtn.disabled = index === 0;
-    nextBtn.disabled = index === slides.length - 1;
+    prevBtn.disabled = maxIndex === 0;
+    nextBtn.disabled = maxIndex === 0;
 
     dotButtons.forEach((dot, dotIndex) => {
       dot.classList.toggle('active', dotIndex === index);
@@ -75,21 +93,45 @@ document.querySelectorAll('[data-carousel]').forEach(carousel => {
   }
 
   prevBtn.addEventListener('click', () => {
-    if (index > 0) {
-      index -= 1;
-      updateCarousel();
-    }
+    if (!getMaxIndex()) return;
+    index = index > 0 ? index - 1 : getMaxIndex();
+    updateCarousel();
+    restartAutoPlay();
   });
 
   nextBtn.addEventListener('click', () => {
-    if (index < slides.length - 1) {
-      index += 1;
-      updateCarousel();
-    }
+    if (!getMaxIndex()) return;
+    index = index < getMaxIndex() ? index + 1 : 0;
+    updateCarousel();
+    restartAutoPlay();
   });
 
-  window.addEventListener('resize', updateCarousel, { passive: true });
+  function startAutoPlay() {
+    clearInterval(autoPlayId);
+    if (!getMaxIndex()) return;
+    autoPlayId = window.setInterval(() => {
+      index = index < getMaxIndex() ? index + 1 : 0;
+      updateCarousel();
+    }, 4000);
+  }
+
+  function restartAutoPlay() {
+    startAutoPlay();
+  }
+
+  function handleResize() {
+    renderDots();
+    updateCarousel();
+    startAutoPlay();
+  }
+
+  carousel.addEventListener('mouseenter', () => clearInterval(autoPlayId));
+  carousel.addEventListener('mouseleave', startAutoPlay);
+
+  window.addEventListener('resize', handleResize, { passive: true });
+  renderDots();
   updateCarousel();
+  startAutoPlay();
 });
 
 // HAMBURGER 
