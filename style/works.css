@@ -90,13 +90,7 @@ a {
   gap: 0.7rem;
   margin-bottom: 0.8rem;
 }
-.s-label::before {
-  content: "";
-  width: 1.8rem;
-  height: 0.5px;
-  background: var(--accent2);
-  display: block;
-}
+
 .reveal {
   opacity: 0;
   transform: translateY(1.6rem);
