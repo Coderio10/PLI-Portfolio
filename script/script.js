@@ -35,6 +35,63 @@ document.querySelectorAll('.step').forEach(s => {
   });
 });
 
+/* ── TESTIMONIAL CAROUSEL ───────────────────── */
+document.querySelectorAll('[data-carousel]').forEach(carousel => {
+  const track = carousel.querySelector('.testi-grid');
+  const slides = Array.from(track.querySelectorAll('.tcard'));
+  const prevBtn = carousel.querySelector('.testi-prev');
+  const nextBtn = carousel.querySelector('.testi-next');
+  const dots = carousel.querySelector('.testi-dots');
+  let index = 0;
+
+  slides.forEach((_, slideIndex) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'testi-dot';
+    dot.setAttribute('aria-label', `Go to testimonial ${slideIndex + 1}`);
+    dot.addEventListener('click', () => {
+      index = slideIndex;
+      updateCarousel();
+    });
+    dots.appendChild(dot);
+  });
+
+  const dotButtons = Array.from(dots.querySelectorAll('.testi-dot'));
+
+  function updateCarousel() {
+    const slideWidth = slides[0].getBoundingClientRect().width;
+    const trackStyles = window.getComputedStyle(track);
+    const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || 0);
+    const offset = index * (slideWidth + gap);
+
+    track.style.transform = `translateX(-${offset}px)`;
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === slides.length - 1;
+
+    dotButtons.forEach((dot, dotIndex) => {
+      dot.classList.toggle('active', dotIndex === index);
+      dot.setAttribute('aria-current', dotIndex === index ? 'true' : 'false');
+    });
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if (index > 0) {
+      index -= 1;
+      updateCarousel();
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (index < slides.length - 1) {
+      index += 1;
+      updateCarousel();
+    }
+  });
+
+  window.addEventListener('resize', updateCarousel, { passive: true });
+  updateCarousel();
+});
+
 // HAMBURGER 
 const hamburger = document.getElementById('navHamburger');
 const navLinks = document.querySelector('.nav-links');
